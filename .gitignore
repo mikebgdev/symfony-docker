@@ -1,0 +1,8 @@
+/*
+!/docker/
+!.env.dist
+!docker-compose.yaml
+!.editorconfig
+!readme.md
+!.gitignore
+!.dockerignore

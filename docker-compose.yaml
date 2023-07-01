@@ -1,0 +1,51 @@
+version: '3.9'
+
+services:
+  nginx:
+    container_name: ${PROJECT_NAME}_nginx
+    build:
+      context: ./docker/
+      args:
+        - SERVER_NAME=${SERVER_NAME}
+        - HTTP_PORT=${HTTP_PORT}
+        - HTTPS_PORT=${HTTPS_PORT}
+      dockerfile: ./nginx/Dockerfile
+    restart: unless-stopped
+    ports:
+      - ${HTTP_PORT}:80
+      - ${HTTPS_PORT}:443
+    entrypoint: /usr/local/bin/entrypoint.sh
+    volumes:
+      - ./${PROJECT_NAME}:/var/www/app
+      - php_socket:/var/run/php
+    depends_on:
+      - php
+    networks:
+      - symfony
+
+  php: 
+    container_name: ${PROJECT_NAME}_php
+    build:
+      context: .
+      args:
+        PROJECT_NAME: ${PROJECT_NAME}
+        SYMFONY_VERSION: ${SYMFONY_VERSION}
+      dockerfile: ./docker/php/Dockerfile
+    restart: unless-stopped
+    volumes:
+      - ./${PROJECT_NAME}:/var/www/app
+      - php_socket:/var/run/php
+    healthcheck:
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+    networks:
+      - symfony
+
+volumes:
+  php_socket:
+
+networks:
+  symfony:
+    name: symfony
