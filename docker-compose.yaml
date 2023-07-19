@@ -2,11 +2,12 @@ version: '3.9'
 
 services:
   nginx:
-    container_name: ${PROJECT_NAME}_nginx
+    container_name: nginx
     build:
       context: ./docker/
       args:
-        - SERVER_NAME=${SERVER_NAME}
+        - PROJECTS_JSON=${PROJECTS_JSON}
+        - SERVER_OWNER=${SERVER_OWNER}
         - HTTP_PORT=${HTTP_PORT}
         - HTTPS_PORT=${HTTPS_PORT}
       dockerfile: ./nginx/Dockerfile
@@ -16,25 +17,25 @@ services:
       - ${HTTPS_PORT}:443
     entrypoint: /usr/local/bin/entrypoint.sh
     volumes:
-      - ./${PROJECT_NAME}:/var/www/app
       - php_socket:/var/run/php
+      - ./projects:/var/www
     depends_on:
       - php
     networks:
       - symfony
 
   php: 
-    container_name: ${PROJECT_NAME}_php
+    container_name: php
     build:
       context: .
       args:
-        PROJECT_NAME: ${PROJECT_NAME}
-        SYMFONY_VERSION: ${SYMFONY_VERSION}
+        - PROJECTS_JSON=${PROJECTS_JSON}
+        - SYMFONY_VERSION=${SYMFONY_VERSION}
       dockerfile: ./docker/php/Dockerfile
     restart: unless-stopped
     volumes:
-      - ./${PROJECT_NAME}:/var/www/app
       - php_socket:/var/run/php
+      - ./projects:/var/www
     healthcheck:
       interval: 10s
       timeout: 3s

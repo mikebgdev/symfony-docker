@@ -1,15 +1,21 @@
-map $http_x_forwarded_proto $fe_https {
+#!/bin/sh
+
+server_name="$1"
+project_name="$2"
+
+cat > "/etc/nginx/conf.d/$project_name.conf" <<EOF
+map \$http_x_forwarded_proto \$fe_https {
   default off;
   https on;
 }
 
 server {
     listen 80;
-    server_name $SERVER_NAME;
+    server_name $server_name;
 
     listen 443 ssl;
-    ssl_certificate     /etc/nginx/certificates/cert.pem;
-    ssl_certificate_key /etc/nginx/certificates/key.pem;
+    ssl_certificate     /etc/nginx/certificates/$project_name.crt.pem;
+    ssl_certificate_key /etc/nginx/certificates/$project_name.key.pem;
 
     server_tokens off;
     client_max_body_size 50M;
@@ -20,25 +26,25 @@ server {
     gzip_disable "msie6";
     gzip_types text/css text/x-component application/x-javascript application/javascript text/javascript text/x-js text/richtext image/svg+xml text/plain text/xsd text/xsl text/xml image/bmp application/java application/msword application/vnd.ms-fontobject application/x-msdownload image/x-icon image/webp application/json application/vnd.ms-access application/vnd.ms-project application/x-font-otf application/vnd.ms-opentype application/vnd.oasis.opendocument.database application/vnd.oasis.opendocument.chart application/vnd.oasis.opendocument.formula application/vnd.oasis.opendocument.graphics application/vnd.oasis.opendocument.spreadsheet application/vnd.oasis.opendocument.text audio/ogg application/pdf application/vnd.ms-powerpoint application/x-shockwave-flash image/tiff application/x-font-ttf audio/wav application/vnd.ms-write application/font-woff application/font-woff2 application/vnd.ms-excel;
 
-    set $root /var/www/app/public;
+    set \$root /var/www/$project_name/public;
 
-    root $root;
+    root \$root;
 
     index index.php index.html;
 
     # Logs
-    access_log /var/log/nginx/access.log;
-    error_log /var/log/nginx/error.log;
+    access_log /var/log/nginx/$project_name.access.log;
+    error_log /var/log/nginx/$project_name.error.log;
 
     # Block all web requests to hidden directories
     location ~ /\. {
-            deny all;
+        deny all;
     }
 
     # Block access to build scripts.
     location ~* /(Gruntfile\.js|package\.json|node_modules) {
-            deny all;
-            return 404;
+        deny all;
+        return 404;
     }
 
     # Add cache headers for site assets.
@@ -49,21 +55,22 @@ server {
     }
 
     location / {
-        try_files $uri $uri/ /index.php?$args;
+        try_files \$uri \$uri/ /index.php?\$args;
     }
 
     location ~ \.php$ {
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        try_files $uri =404;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        try_files \$uri =404;
         fastcgi_split_path_info ^(.+\.php)(/.+)$;
         fastcgi_pass php:9000;
         fastcgi_index index.php;
         include fastcgi_params;
         fastcgi_buffer_size 32k;
         fastcgi_buffers 4 32k;
-        fastcgi_param HTTPS $fe_https;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_param HTTPS \$fe_https;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        fastcgi_param PATH_INFO \$fastcgi_path_info;
     }
 }
+EOF

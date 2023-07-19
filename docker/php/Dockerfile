@@ -1,10 +1,10 @@
 FROM php:8.2-fpm-alpine
 
 # Main params
-ARG PROJECT_NAME=""
-ENV PROJECT_NAME ${PROJECT_NAME}
 ARG SYMFONY_VERSION=""
 ENV SYMFONY_VERSION ${SYMFONY_VERSION}
+ARG PROJECTS_JSON=""
+ENV PROJECTS_JSON=$PROJECTS_JSON
 
 WORKDIR /var/www/
 
@@ -26,6 +26,9 @@ RUN set -eux; \
 		opcache \
 		zip \
     ;
+
+RUN apk update && \
+    apk add --no-cache jq
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 COPY --link docker/php/conf.d/app.ini $PHP_INI_DIR/conf.d/
@@ -49,7 +52,3 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV PATH="${PATH}:/root/.composer/vendor/bin"
 
 COPY --from=composer/composer:2-bin --link /composer /usr/bin/composer
-
-RUN if [ -d app ] && [ -f app/composer.json ]; then \
-      cp -R ${PROJECT_NAME}/. ${APP_HOME}/; \
-    fi
