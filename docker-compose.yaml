@@ -1,52 +1,52 @@
 version: '3.9'
 
 services:
-  nginx:
-    container_name: nginx
-    build:
-      context: ./docker/
-      args:
-        - PROJECTS_JSON=${PROJECTS_JSON}
-        - SERVER_OWNER=${SERVER_OWNER}
-        - HTTP_PORT=${HTTP_PORT}
-        - HTTPS_PORT=${HTTPS_PORT}
-      dockerfile: ./nginx/Dockerfile
-    restart: unless-stopped
-    ports:
-      - ${HTTP_PORT}:80
-      - ${HTTPS_PORT}:443
-    entrypoint: /usr/local/bin/entrypoint.sh
-    volumes:
-      - php_socket:/var/run/php
-      - ./projects:/var/www
-    depends_on:
-      - php
-    networks:
-      - symfony
+    nginx:
+        container_name: nginx
+        build:
+            context: ./docker/
+            args:
+                - PROJECTS_JSON=${PROJECTS_JSON}
+                - SERVER_OWNER=${SERVER_OWNER}
+                - HTTP_PORT=${HTTP_PORT}
+                - HTTPS_PORT=${HTTPS_PORT}
+            dockerfile: ./nginx/Dockerfile
+        restart: unless-stopped
+        ports:
+            - ${HTTP_PORT}:80
+            - ${HTTPS_PORT}:443
+        entrypoint: /usr/local/bin/entrypoint.sh
+        volumes:
+            - php_socket:/var/run/php
+            - ./projects:/var/www
+        depends_on:
+            - php
+        networks:
+            - symfony
 
-  php: 
-    container_name: php
-    build:
-      context: .
-      args:
-        - PROJECTS_JSON=${PROJECTS_JSON}
-        - SYMFONY_VERSION=${SYMFONY_VERSION}
-      dockerfile: ./docker/php/Dockerfile
-    restart: unless-stopped
-    volumes:
-      - php_socket:/var/run/php
-      - ./projects:/var/www
-    healthcheck:
-      interval: 10s
-      timeout: 3s
-      retries: 3
-      start_period: 30s
-    networks:
-      - symfony
+    php:
+        container_name: php
+        build:
+            context: .
+            args:
+                - PROJECTS_JSON=${PROJECTS_JSON}
+                - SYMFONY_VERSION=${SYMFONY_VERSION}
+            dockerfile: ./docker/php/Dockerfile
+        restart: unless-stopped
+        volumes:
+            - php_socket:/var/run/php
+            - ./projects:/var/www
+        healthcheck:
+            interval: 10s
+            timeout: 3s
+            retries: 3
+            start_period: 30s
+        networks:
+            - symfony
 
 volumes:
-  php_socket:
+    php_socket:
 
 networks:
-  symfony:
-    name: symfony
+    symfony:
+        name: symfony

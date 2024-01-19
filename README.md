@@ -18,7 +18,7 @@ Create the .env file from the .env.dist
     - host: the name of the host to access by the browser and to create your ssl certificates
 
 Example:
-``` 
+```
 '{
   "projects": [
     {
@@ -31,7 +31,7 @@ Example:
     }
   ]
 }'
-``` 
+```
 - SYMFONY_VERSION: indicates the version of symfony 6 or higher, for example 6.3.*
 - SERVER_OWNER: to create the self signed ssl certificate
 - HTTP_PORT: your port for http access (80 by default)
