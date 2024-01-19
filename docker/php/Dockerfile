@@ -34,6 +34,11 @@ RUN apk add libpng-dev libjpeg-turbo-dev freetype-dev
 RUN apk update
 RUN docker-php-ext-install gd
 
+# Install nodejs npm
+RUN apk update && apk add --no-cache \
+    nodejs \
+    npm
+
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 COPY --link docker/php/conf.d/app.ini $PHP_INI_DIR/conf.d/
 
