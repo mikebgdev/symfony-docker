@@ -56,6 +56,18 @@ RUN chmod +x /usr/local/bin/docker-entrypoint
 ENTRYPOINT ["docker-entrypoint"]
 CMD ["php-fpm"]
 
+# Install php-cs-fixer
+RUN wget https://cs.symfony.com/download/php-cs-fixer-v3.phar -O /usr/local/bin/php-cs-fixer && \
+    chmod +x /usr/local/bin/php-cs-fixer
+
+# Install phpstan
+RUN wget https://github.com/phpstan/phpstan/releases/download/1.0.0/phpstan.phar -O /usr/local/bin/phpstan && \
+    chmod +x /usr/local/bin/phpstan
+
+# Install phpunit
+RUN wget https://phar.phpunit.de/phpunit-9.phar -O /usr/local/bin/phpunit && \
+    chmod +x /usr/local/bin/phpunit
+
 # https://getcomposer.org/doc/03-cli.md#composer-allow-superuser
 ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV PATH="${PATH}:/root/.composer/vendor/bin"

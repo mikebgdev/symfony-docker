@@ -21,6 +21,7 @@ if [ "$1" = 'php-fpm' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 		cd $name
 		composer install --prefer-dist --no-progress --no-interaction
 
+		chmod -R 775 public
 		chmod -R 775 var/cache/dev
 		chown -R www-data:www-data var/cache/dev
 
